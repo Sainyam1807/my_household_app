@@ -6,8 +6,8 @@
         <div class="col-md-6">
             <div class="card mt-5">
                 <div class="card-body">
-                    <h2 class="card-title text-center mb-4">User Registration</h2>
-                    <form action="{{ url_for('auth.register_user') }}" method="POST">
+                    <h2 class="card-title text-center mb-4">Professional Registration</h2>
+                    <form action="{{ url_for('auth.register_professional') }}" method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email (Username)</label>
                             <input type="email" class="form-control" id="email" name="email" required>
@@ -23,6 +23,18 @@
                         <div class="mb-3">
                             <label for="full_name" class="form-label">Full Name</label>
                             <input type="text" class="form-control" id="full_name" name="full_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="service_name" class="form-label">Service Name</label>
+                            <input type="text" class="form-control" id="service_name" name="service_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="experience" class="form-label">Experience (in years)</label>
+                            <input type="number" class="form-control" id="experience" name="experience" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="documents" class="form-label">Upload Documents</label>
+                            <input type="file" class="form-control" id="documents" name="documents" required>
                         </div>
                         <div class="mb-3">
                             <label for="address" class="form-label">Address</label>
