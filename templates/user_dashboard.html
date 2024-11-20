@@ -16,13 +16,18 @@
             <div class="card-body">
                 <div class="list-group">
                     {% for service in available_services %}
-                    <a href="{{ url_for('user.book_service', service_id=service.id) }}" class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
                             <h5 class="mb-1">{{ service.name }}</h5>
                             <small>{{ service.base_price }}</small>
                         </div>
                         <p class="mb-1">{{ service.description }}</p>
-                    </a>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <small>Duration: {{ service.duration }} hours</small>
+                            <a href="{{ url_for('user.book_service', service_id=service.id) }}"
+                                class="btn btn-primary btn-sm">Book Now</a>
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -30,9 +35,8 @@
     </div>
 
 
-
     <!-- service history-->
-    
+
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header">
@@ -60,11 +64,13 @@
                             <td>{{ service.status }}</td>
                             <td>
                                 {% if service.status == 'requested' %}
-                                    <span class="text-warning">Pending</span>
+                                <span class="text-warning">Pending</span>
                                 {% elif service.status == 'closed' %}
-                                    <a href="{{ url_for('user.rate_service', service_id=service.id) }}" class="btn btn-sm btn-primary">Rate</a>
+                                <a href="{{ url_for('user.rate_service', service_id=service.id) }}"
+                                    class="btn btn-sm btn-primary">Rate</a>
                                 {% else %}
-                                    <a href="{{ url_for('user.close_service', service_id=service.id) }}" class="btn btn-sm btn-success">Close</a>
+                                <a href="{{ url_for('user.close_service', service_id=service.id) }}"
+                                    class="btn btn-sm btn-success">Close</a>
                                 {% endif %}
                             </td>
                         </tr>

@@ -30,8 +30,10 @@
                             <td>{{ service.customer.contact }}</td>
                             <td>{{ service.customer.address }} ({{ service.customer.pincode }})</td>
                             <td>
-                                <a href="{{ url_for('professional.accept_service', service_id=service.id) }}" class="btn btn-sm btn-success">Accept</a>
-                                <a href="{{ url_for('professional.reject_service', service_id=service.id) }}" class="btn btn-sm btn-danger">Reject</a>
+                                <a href="{{ url_for('professional.accept_service', service_id=service.id) }}"
+                                    class="btn btn-sm btn-success">Accept</a>
+                                <a href="{{ url_for('professional.reject_service', service_id=service.id) }}"
+                                    class="btn btn-sm btn-danger">Reject</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -40,7 +42,7 @@
             </div>
         </div>
     </div>
-    
+
 
     <!-- closed services info-->
     <div class="col-md-6">
