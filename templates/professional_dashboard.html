@@ -1,0 +1,82 @@
+{% extends "index.html" %}
+
+{% block title %}Professional Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<h1 class="mb-4">Professional Dashboard</h1>
+
+
+<!-- current services availabe-->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Today's Services</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Contact</th>
+                            <th>Location</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in todays_services %}
+                        <tr>
+                            <td>{{ service.customer.name }}</td>
+                            <td>{{ service.customer.contact }}</td>
+                            <td>{{ service.customer.address }} ({{ service.customer.pincode }})</td>
+                            <td>
+                                <a href="{{ url_for('professional.accept_service', service_id=service.id) }}" class="btn btn-sm btn-success">Accept</a>
+                                <a href="{{ url_for('professional.reject_service', service_id=service.id) }}" class="btn btn-sm btn-danger">Reject</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- closed services info-->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Closed Services</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Contact</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in closed_services %}
+                        <tr>
+                            <td>{{ service.customer.name }}</td>
+                            <td>{{ service.customer.contact }}</td>
+                            <td>{{ service.customer.address }} ({{ service.customer.pincode }})</td>
+                            <td>{{ service.date }}</td>
+                            <td>{{ service.rating }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-end mt-4">
+    <a href="{{ url_for('professional.edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+</div>
+{% endblock %}

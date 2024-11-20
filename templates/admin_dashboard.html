@@ -1,0 +1,111 @@
+{% extends "index.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<h1 class="mb-4">Admin Dashboard</h1>
+
+
+<!--user and professional count-->
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">User Management</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Customers
+                        <span class="badge bg-primary rounded-pill">{{ customer_count }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Professionals
+                        <span class="badge bg-primary rounded-pill">{{ professional_count }}</span>
+                    </li>
+                </ul>
+                <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary mt-3">Manage Users</a>
+            </div>
+        </div>
+    </div>
+    
+
+    <!--manage services-->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Services</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for service in services %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ service.name }}
+                        <div>
+                            <a href="{{ url_for('admin.edit_service', service_id=service.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{{ url_for('admin.delete_service', service_id=service.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ url_for('admin.create_service') }}" class="btn btn-success mt-3">Create New Service</a>
+            </div>
+        </div>
+    </div>
+    
+
+    <!--managing professionals-->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Professional Approvals</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for professional in pending_professionals %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ professional.name }}
+                        <div>
+                            <a href="{{ url_for('admin.approve_professional', professional_id=professional.id) }}" class="btn btn-sm btn-outline-success">Approve</a>
+                            <a href="{{ url_for('admin.reject_professional', professional_id=professional.id) }}" class="btn btn-sm btn-outline-danger">Reject</a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--requested services-->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="card-title">Service Requests</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Professional</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in service_requests %}
+                <tr>
+                    <td>{{ request.professional.name }}</td>
+                    <td>{{ request.customer.name }}</td>
+                    <td>{{ request.service.name }}</td>
+                    <td>{{ request.date }}</td>
+                    <td>{{ request.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
