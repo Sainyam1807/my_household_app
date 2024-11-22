@@ -1,0 +1,117 @@
+<!-- base dashboard-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Household Services{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- common navbar for all-->
+    {% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main.home') }}">A-Z Household Services</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.summary') }}">Summary</a>
+                </li>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminSearchDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Admin Search
+                        </a>
+                        <div class="dropdown-menu p-3" aria-labelledby="adminSearchDropdown" style="width: 300px;">
+                            <form action="{{ url_for('admin.search') }}" method="GET">
+                                <div class="mb-3">
+                                    <label for="searchType" class="form-label">Search Type</label>
+                                    <select class="form-select" id="searchType" name="search_type">
+                                        <option value="services">Services</option>
+                                        <option value="customers">Customers</option>
+                                        <option value="professionals">Professionals</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="serviceStatus" class="form-label">Service Status</label>
+                                    <select class="form-select" id="serviceStatus" name="service_status">
+                                        <option value="all">All</option>
+                                        <option value="requested">Requested</option>
+                                        <option value="closed">Closed</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="searchQuery" class="form-label">Search Query</label>
+                                    <input type="text" class="form-control" id="searchQuery" name="query" placeholder="Enter search term">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% elif current_user.role == 'professional' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="professionalSearchDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Professional Search
+                        </a>
+                        <div class="dropdown-menu p-3" aria-labelledby="professionalSearchDropdown" style="width: 300px;">
+                            <form action="{{ url_for('professional.search') }}" method="GET">
+                                <div class="mb-3">
+                                    <label for="searchDate" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="searchDate" name="date">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="searchLocation" class="form-label">Location</label>
+                                    <input type="text" class="form-control" id="searchLocation" name="location" placeholder="Enter location">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userSearchDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            User Search
+                        </a>
+                        <div class="dropdown-menu p-3" aria-labelledby="userSearchDropdown" style="width: 300px;">
+                            <form action="{{ url_for('user.search') }}" method="GET">
+                                <div class="mb-3">
+                                    <label for="searchService" class="form-label">Service Name</label>
+                                    <input type="text" class="form-control" id="searchService" name="service" placeholder="Enter service name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="searchProfessional" class="form-label">Professional</label>
+                                    <input type="text" class="form-control" id="searchProfessional" name="professional" placeholder="Enter professional name">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% block dashboard_content %}
+    {% endblock %}
+</div>
+{% endblock %}

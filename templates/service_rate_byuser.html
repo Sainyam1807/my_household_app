@@ -3,6 +3,8 @@
 {% block title %}Rate Service{% endblock %}
 
 {% block dashboard_content %}
+
+<!-- basic info of services-->
 <div class="container">
     <h1 class="mb-4">Rate Service</h1>
     <div class="card">
@@ -11,7 +13,9 @@
             <p class="card-text"><strong>Professional:</strong> {{ service.professional.name }}</p>
             <p class="card-text"><strong>Date:</strong> {{ service.date.strftime('%Y-%m-%d') }}</p>
             <p class="card-text"><strong>Contact:</strong> {{ service.professional.phone }}</p>
-            
+
+            <!-- rating-->
+
             <form action="{{ url_for('user.submit_rating', service_id=service.id) }}" method="POST">
                 <div class="mb-3">
                     <label for="rating" class="form-label">Rating</label>
@@ -40,12 +44,14 @@
         flex-direction: row-reverse;
         justify-content: flex-end;
     }
-    .rating:not(:checked) > input {
+
+    .rating:not(:checked)>input {
         position: absolute;
         top: -9999px;
-        clip: rect(0,0,0,0);
+        clip: rect(0, 0, 0, 0);
     }
-    .rating:not(:checked) > label {
+
+    .rating:not(:checked)>label {
         float: right;
         width: 1em;
         padding: 0 .1em;
@@ -56,21 +62,25 @@
         line-height: 1.2;
         color: #ddd;
     }
-    .rating:not(:checked) > label:before {
+
+    .rating:not(:checked)>label:before {
         content: '★ ';
     }
-    .rating > input:checked ~ label {
+
+    .rating>input:checked~label {
         color: #f70;
     }
-    .rating:not(:checked) > label:hover,
-    .rating:not(:checked) > label:hover ~ label {
+
+    .rating:not(:checked)>label:hover,
+    .rating:not(:checked)>label:hover~label {
         color: gold;
     }
-    .rating > input:checked + label:hover,
-    .rating > input:checked + label:hover ~ label,
-    .rating > input:checked ~ label:hover,
-    .rating > input:checked ~ label:hover ~ label,
-    .rating > label:hover ~ input:checked ~ label {
+
+    .rating>input:checked+label:hover,
+    .rating>input:checked+label:hover~label,
+    .rating>input:checked~label:hover,
+    .rating>input:checked~label:hover~label,
+    .rating>label:hover~input:checked~label {
         color: #ea0;
     }
 </style>
