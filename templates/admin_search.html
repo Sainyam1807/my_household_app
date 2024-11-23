@@ -1,0 +1,28 @@
+{% extends "base_dashboard.html" %}
+
+{% block dashboard_content %}
+<h2>Admin Search</h2>
+<form action="{{ url_for('admin_search') }}" method="GET">
+    <div class="mb-3">
+        <label for="searchType" class="form-label">Search Type</label>
+        <select class="form-select" id="searchType" name="search_type">
+            <option value="services">Services</option>
+            <option value="customers">Customers</option>
+            <option value="professionals">Professionals</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="serviceStatus" class="form-label">Service Status</label>
+        <select class="form-select" id="serviceStatus" name="service_status">
+            <option value="all">All</option>
+            <option value="requested">Requested</option>
+            <option value="closed">Closed</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="searchQuery" class="form-label">Search Query</label>
+        <input type="text" class="form-control" id="searchQuery" name="query" placeholder="Enter search term">
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+{% endblock %}

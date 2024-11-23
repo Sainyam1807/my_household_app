@@ -13,6 +13,7 @@ def setup_app():
     db.init_app(app) #flask app connected to db(SQLAlchemy)
     app.app_context().push() #direct access to other modukes like backend folder
     print("household app is staring....")
+    # app.secret_key = 'your_secret_key'   # to be checked
 
 #calling the setup app function
 setup_app()

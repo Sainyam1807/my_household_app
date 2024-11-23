@@ -1,0 +1,16 @@
+{% extends "base_dashboard.html" %}
+
+{% block dashboard_content %}
+<h2>User Search</h2>
+<form action="{{ url_for('user_search') }}" method="GET">
+    <div class="mb-3">
+        <label for="searchService" class="form-label">Service Name</label>
+        <input type="text" class="form-control" id="searchService" name="service" placeholder="Enter service name">
+    </div>
+    <div class="mb-3">
+        <label for="searchProfessional" class="form-label">Professional</label>
+        <input type="text" class="form-control" id="searchProfessional" name="professional" placeholder="Enter professional name">
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+{% endblock %}

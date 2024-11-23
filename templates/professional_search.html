@@ -1,0 +1,16 @@
+{% extends "base_dashboard.html" %}
+
+{% block dashboard_content %}
+<h2>Professional Search</h2>
+<form action="{{ url_for('professional_search') }}" method="GET">
+    <div class="mb-3">
+        <label for="searchDate" class="form-label">Date</label>
+        <input type="date" class="form-control" id="searchDate" name="date">
+    </div>
+    <div class="mb-3">
+        <label for="searchLocation" class="form-label">Location</label>
+        <input type="text" class="form-control" id="searchLocation" name="location" placeholder="Enter location">
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+{% endblock %}

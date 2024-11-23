@@ -8,7 +8,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    role = db.Column(db.Integer, default=1)  # 1 for customer, 2 for professional, 3 for admin
+    role = db.Column(db.Integer, default=1)  # 1 for customer, 2 for professional, 0 for admin
     full_name = db.Column(db.String(120), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     pincode = db.Column(db.Integer, nullable=False)
@@ -38,7 +38,7 @@ class Professional(db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     service_name = db.Column(db.String(100), nullable=False)
     experience = db.Column(db.Integer, nullable=False)
-    uploaded_documents = db.Column(db.String(255))  # Store file path or URL
+    # uploaded_documents = db.Column(db.String(255))  # Store file path or URL
     address = db.Column(db.String(255), nullable=False)
     pincode = db.Column(db.Integer, nullable=False)
     service_requests = db.relationship('ServiceRequest',cascade="all,delete", backref='professional', lazy='dynamic') #relationship: professionals can access its service requests
