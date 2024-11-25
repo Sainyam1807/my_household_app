@@ -1,0 +1,41 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Edit Service{% endblock %}
+
+{% block dashboard_content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Edit Service</h2>
+    <h4 class="text-center mb-4">Welcome, {{ name }}</h4>
+    <form action="{{ url_for('edit_service', name=name, service_id=service.id) }}" method="POST">
+        <!-- Service Name -->
+        <div class="mb-3">
+            <label for="service_name" class="form-label">Service Name:</label>
+            <input type="text" class="form-control" id="service_name" name="service_name" value="{{ service.name }}" required>
+        </div>
+
+        <!-- Price -->
+        <div class="mb-3">
+            <label for="base_price" class="form-label">Base Price: Rs </label>
+            <input type="number" class="form-control" id="base_price" name="base_price" value="{{ service.price }}" required>
+        </div>
+
+        <!-- Duration -->
+        <div class="mb-3">
+            <label for="duration" class="form-label">Duration (in hours):</label>
+            <input type="text" class="form-control" id="duration" name="duration" value="{{ service.duration }}" required>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Description:</label>
+            <textarea class="form-control" id="description" name="description" rows="4" required>{{ service.description }}</textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Update</button>
+            <a href="{{ url_for('admin_dashboard', name=name) }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

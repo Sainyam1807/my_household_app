@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Household Services{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->
 </head>
 
 <body>
@@ -25,11 +26,11 @@
                         <!-- <a class="nav-link" href="{{ url_for('home') }}">Home</a> -->
                     {% if user %}
                         {% if user.role == 0 %}
-                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Home</a>
+                        <a class="nav-link" href="{{ url_for('admin_dashboard', name=name) }}">Home</a>
                         {% elif user.role == 2 %}
-                        <a class="nav-link" href="{{ url_for('professional_dashboard') }}">Home</a>
+                        <a class="nav-link" href="{{ url_for('professional_dashboard', name=name) }}">Home</a>
                         {% else %}
-                        <a class="nav-link" href="{{ url_for('user_dashboard') }}">Home</a>
+                        <a class="nav-link" href="{{ url_for('user_dashboard', name=name) }}">Home</a>
                         {% endif %}
                     {% else %}
                         <a class="nav-link" href="{{ url_for('home') }}">Home</a>
@@ -154,7 +155,7 @@
     </nav>
 
     <div class="container">
-        {% block dashboard_content %}
+        {% block dashboard_content %} <!-- block is a keyword and name of the block is dashboard_content-->
         {% endblock %}
     </div>
     {% endblock %}

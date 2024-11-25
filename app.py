@@ -2,6 +2,10 @@ from flask import Flask #,render_template(dont want this now)
 
 from backend.models import db
 
+# from sqlalchemy import event
+# from sqlalchemy.engine import Engine
+# import sqlite3
+
 #setting up of app
 app=None
 
@@ -17,6 +21,13 @@ def setup_app():
 
 #calling the setup app function
 setup_app()
+
+# @event.listens_for(Engine, "connect")
+# def set_sqlite_pragma(dbapi_connection, connection_record):
+#     if isinstance(dbapi_connection, sqlite3.Connection):  # Apply only to SQLite connections
+#         cursor = dbapi_connection.cursor()
+#         cursor.execute("PRAGMA busy_timeout = 5000;")  # Wait up to 5 seconds for the lock to be released
+#         cursor.close()
 
 #accessing controllers.py in this
 from backend.controllers import *

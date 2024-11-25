@@ -1,11 +1,11 @@
-{% extends "base_dashboard.html" %}
+{% extends "base_dashboard.html" %}  <!-- Inheritence-->
 
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block dashboard_content %}
-<h1 class="mb-4">Admin Dashboard</h1>
-<h1 class="mb-4">Welcome, {{ user.full_name }}!</h1>
-<p>Your role: Professional</p>
+<!-- <h1 class="mb-4">Admin Dashboard</h1> -->
+<h1 class="mb-4">Welcome, {{name}}!</h1>
+<!-- <p>Your role: Professional</p> -->
 
 <!--user and professional count-->
 <div class="row">
@@ -18,43 +18,64 @@
                 <ul class="list-group">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Customers
-                        <span class="badge bg-primary rounded-pill">{{ customer_count }}</span>
+                        <span class="badge bg-primary rounded-pill">{{ user_count }}</span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <!-- <li class="list-group-item d-flex justify-content-between align-items-center">
                         Professionals
                         <span class="badge bg-primary rounded-pill">{{ professional_count }}</span>
-                    </li>
+                    </li> -->
                 </ul>
-                <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary mt-3">Manage Users</a>
+                <a href="{{ url_for('admin_manage_users') }}" class="btn btn-primary mt-3">Manage Users</a>
             </div>
         </div>
     </div>
 
 
-    <!--manage services-->
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title">Services</h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-group">
-                    {% for service in services %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ service.name }}
-                        <div>
-                            <a href="{{ url_for('admin.edit_service', service_id=service.id) }}"
-                                class="btn btn-sm btn-outline-primary">Edit</a>
-                            <a href="{{ url_for('admin.delete_service', service_id=service.id) }}"
-                                class="btn btn-sm btn-outline-danger">Delete</a>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
-                <a href="{{ url_for('admin.create_service') }}" class="btn btn-success mt-3">Create New Service</a>
-            </div>
-        </div>
+
+<!-- Manage Services -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title">Services</h5>
     </div>
+    <div class="card-body">
+        {% if services %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Service Name</th>
+                    <th>Base Price</th>
+                    <th>Duration</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                <tr>
+                    <td>{{ service.id }}</td>
+                    <td>{{ service.name }}</td>
+                    <td>{{ service.price }}</td>
+                    <td>{{ service.duration }}</td>
+                    <td>{{ service.description }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_service', name=name, service_id=service.id) }}" 
+                           class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a href="{{ url_for('delete_service', name=name, service_id=service.id) }}" 
+                           class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <h3 class="text-center">Sorry, there are no services available.</h3>
+        {% endif %}
+        <a href="{{ url_for('create_service', name=name) }}" class="btn btn-success mt-3">+ New Service</a>
+    </div>
+</div>
+
+
 
 
     <!--managing professionals-->

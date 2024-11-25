@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,19 +12,22 @@
         body {
             background-color: #f8f9fa;
         }
+
         .login-container {
             max-width: 400px;
             margin: 20px auto;
             padding: 20px;
             background-color: #ffffff;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         .carousel-item img {
             width: 100%;
             height: 700px;
             object-fit: cover;
         }
+
         .carousel-caption {
             color: black;
             background-color: rgba(0, 0, 0, 0.5);
@@ -32,6 +36,7 @@
             padding-top: 10px;
             padding-bottom: 10px;
         }
+
         .carousel-caption h5 {
             margin-bottom: 5px;
         }
@@ -39,15 +44,23 @@
         .carousel-caption p {
             margin-bottom: 0;
         }
+
+        .err_message {
+            text-align: center;
+            margin: auto;
+            color: maroon;
+        }
     </style>
 </head>
+
 <body>
 
     <!--navbar-->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="#">Household Services</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -67,27 +80,33 @@
     <div class="container">
         <div id="serviceCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
             <div class="carousel-indicators">
-                <button type="button" data-bs-target="#serviceCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                <button type="button" data-bs-target="#serviceCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                <button type="button" data-bs-target="#serviceCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                <button type="button" data-bs-target="#serviceCarousel" data-bs-slide-to="0" class="active"
+                    aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#serviceCarousel" data-bs-slide-to="1"
+                    aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#serviceCarousel" data-bs-slide-to="2"
+                    aria-label="Slide 3"></button>
             </div>
             <div class="carousel-inner">
                 <div class="carousel-item active">
-                    <img src="{{ url_for('static', filename='images/cleaning_service.jpg') }}" class="d-block w-100" alt="Household Service 1">
+                    <img src="{{ url_for('static', filename='images/cleaning_service.jpg') }}" class="d-block w-100"
+                        alt="Household Service 1">
                     <div class="carousel-caption d-none d-md-block">
                         <h5>Professional Cleaning</h5>
                         <p>Expert cleaning services for your home</p>
                     </div>
                 </div>
                 <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/handyman_services.jpeg') }}" class="d-block w-100" alt="Household Service 2">
+                    <img src="{{ url_for('static', filename='images/handyman_services.jpeg') }}" class="d-block w-100"
+                        alt="Household Service 2">
                     <div class="carousel-caption d-none d-md-block">
                         <h5>Handyman Services</h5>
                         <p>Reliable repairs and maintenance</p>
                     </div>
                 </div>
                 <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/gardening_services.jpeg') }}" class="d-block w-100" alt="Household Service 3">
+                    <img src="{{ url_for('static', filename='images/gardening_services.jpeg') }}" class="d-block w-100"
+                        alt="Household Service 3">
                     <div class="carousel-caption d-none d-md-block">
                         <h5>Gardening and Landscaping</h5>
                         <p>Transform your outdoor spaces</p>
@@ -109,6 +128,11 @@
 
         <section class="login" id="login"></section>
         <div class="login-container">
+            {% if msg %}
+            <div class="alert alert-success" role="alert">
+                {{ msg }}
+            </div>
+            {% endif %}
             <h2 class="text-center mb-4">Login</h2>
             <form action="{{ url_for('login') }}" method="POST">
                 <div class="mb-3">
@@ -124,8 +148,10 @@
             <div class="mt-3 text-center">
                 <p>Don't have an account?</p>
                 <a href="{{ url_for('registeruser') }}" class="btn btn-outline-success me-2">Register as User</a>
-                <a href="{{ url_for('registerprofessional') }}" class="btn btn-outline-success">Register as Professional</a>
+                <a href="{{ url_for('registerprofessional') }}" class="btn btn-outline-success">Register as
+                    Professional</a>
             </div>
+            <div class="err_message"> {{message}} </div>
         </div>
     </div>
 
@@ -137,4 +163,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
