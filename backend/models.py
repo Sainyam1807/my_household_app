@@ -41,6 +41,7 @@ class Professional(db.Model):
     # uploaded_documents = db.Column(db.String(255))  # Store file path or URL
     address = db.Column(db.String(255), nullable=False)
     pincode = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(10), nullable=False, default='pending') # for approval of admin
     service_requests = db.relationship('ServiceRequest',cascade="all,delete", backref='professional', lazy='dynamic') #relationship: professionals can access its service requests
 
     # __mapper_args__ = {

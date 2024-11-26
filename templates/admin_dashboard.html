@@ -76,32 +76,38 @@
 </div>
 
 
-
-
-    <!--managing professionals-->
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title">Professional Approvals</h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-group">
-                    {% for professional in pending_professionals %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ professional.name }}
-                        <div>
-                            <a href="{{ url_for('admin.approve_professional', professional_id=professional.id) }}"
-                                class="btn btn-sm btn-outline-success">Approve</a>
-                            <a href="{{ url_for('admin.reject_professional', professional_id=professional.id) }}"
-                                class="btn btn-sm btn-outline-danger">Reject</a>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
+<!-- Managing Professionals -->
+<div class="col-md-4">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title">Professional Approvals</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                {% for professional in pending_prof %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Name:</strong> {{ professional.full_name }}<br>
+                        <strong>Email:</strong> {{ professional.email }}<br>
+                        <strong>Service:</strong> {{ professional.service_name }}<br>
+                        <strong>Experience:</strong> {{ professional.experience }} years<br>
+                        <strong>Address:</strong> {{ professional.address }}, {{ professional.pincode }}
+                    </div>
+                    <div>
+                        <form action="{{ url_for('approve_professional', name=name, professional_id=professional.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-outline-success">Approve</button>
+                        </form>
+                        <form action="{{ url_for('reject_professional',name=name, professional_id=professional.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </div>
+
 
 
 <!--requested services-->
@@ -110,24 +116,32 @@
         <h5 class="card-title">Service Requests</h5>
     </div>
     <div class="card-body">
+        <a href="{{ url_for('admin_servicerequests', name=name) }}" class="btn btn-primary mb-3">View Requested Services</a>
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>Service ID</th>
                     <th>Professional</th>
                     <th>Customer</th>
                     <th>Service</th>
-                    <th>Date</th>
+                    <th>Date of Request</th>
+                    <th>Date of Completion</th>
                     <th>Status</th>
+                    <th>Rating</th>
                 </tr>
             </thead>
             <tbody>
-                {% for request in service_requests %}
+                {% for result in results %}
                 <tr>
-                    <td>{{ request.professional.name }}</td>
-                    <td>{{ request.customer.name }}</td>
+                    <td>{{ result.id }}</td>
+                    <td>{{ result.professional.full_name if result.professional.full_name else 'N/A' }}</td>
+                    <td>{{ request.user.full_name }}</td>
                     <td>{{ request.service.name }}</td>
-                    <td>{{ request.date }}</td>
-                    <td>{{ request.status }}</td>
+                    <td>{{ request.date_of_request }}</td>
+                    <td>{{ request.date_of_completion if result.date_of_completion else 'N/A' }}</td>
+                    <td>{{ request.service_status }}</td>
+                    <td>{{ request.rating if result.rating else 'Not Rated'}}</td>
+
                 </tr>
                 {% endfor %}
             </tbody>

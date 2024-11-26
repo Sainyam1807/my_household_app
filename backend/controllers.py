@@ -71,19 +71,17 @@ def registerprofessional():
         experience=request.form.get("experience")
         address=request.form.get("address")
         pincode=request.form.get("pincode")
-        usr=Professional(email=uname) 
-        if usr:
+        usr = Professional.query.filter_by(email=uname).first()
+        if usr:   
             return redirect(url_for('login', msg="Email already registered")) #if professional is already in database
-        new_usr=Professional(email=uname,password=pwd,full_name=fullname,service_name=servicename,experience=experience,address=address,pincode=pincode) #creating user object
-        db.session.add(new_usr)  #pushing new user in database
+        # if user is not already present
+        new_usr = Professional(email=uname, password=pwd, full_name=fullname, service_name=servicename, experience=experience, address=address, pincode=pincode, status='pending')  # status==pending for each registeration
+        db.session.add(new_usr)
         db.session.commit()
        
-        return redirect(url_for('login', msg="Registration successful"))
+        return redirect(url_for('login', msg="Registration successful,  admin approval is pending"))
     
     return render_template("professional_register.html", msg="")   #GET response
-
-
-#------------------------------------------------------------FINAL-------------------------------------------------------------------------------------
 
 
 #dashboards routing-----
@@ -96,8 +94,10 @@ def admin_dashboard(name):
     services=get_services()  # for rendering for-loops of jinja templating
 
     user_count = User.query.filter_by(role=1).count()  # for calculating user count
+
+    pending_prof = Professional.query.filter_by(status='pending').all()  #for seeing all pending professionals
     
-    return render_template("admin_dashboard.html", user=User.query.filter_by(role=0).first(), name=name, services=services, user_count=user_count)
+    return render_template("admin_dashboard.html", user=User.query.filter_by(role=0).first(), name=name, services=services, user_count=user_count, pending_prof=pending_prof)
 
 # user dashboard
 @app.route('/userdashboard/<name>')
@@ -160,7 +160,7 @@ def admin_remove_user(user_id):
 
 # edit service in admin services
 @app.route('/admin/edit_service/<name>/<service_id>', methods=["GET", "POST"])
-def edit_service(name,service_id):
+def edit_service(name,service_id):    #   example of query parameters: adminstrator/1
     service = Service.query.get(service_id)
     if request.method == "POST":
         service.name = request.form.get("service_name")
@@ -171,7 +171,7 @@ def edit_service(name,service_id):
         return redirect(url_for('admin_dashboard', name=name))
     return render_template("admin_edit_service.html", service=service, name=name)
 
-#to be checked
+# delete service in manage services for admin
 @app.route('/admin/delete_service/<name>/<int:service_id>', methods=["POST", "GET"])
 def delete_service(name,service_id):
     service = Service.query.get(service_id)
@@ -179,11 +179,90 @@ def delete_service(name,service_id):
         db.session.delete(service)
         db.session.commit()
         return redirect(url_for('admin_dashboard', name=name))
-    # else:
-    #     return "Service not found", 404
+ 
+
+# admin search
+@app.route('/admin/search/<name>', methods=['GET'])
+def admin_search(name):
+    # Retrieve parameters
+    search_type = request.args.get('search_type', 'services')  # 'services'by default |  these are the search parameters eg: ?search_type=services&query=
+    query_term = request.args.get('query', '').strip()  #  empty string by default
+
+    results = []  # Initialising results
+
+    # Handle services search
+    if search_type == 'services':
+        service_query = ServiceRequest.query.join(Service)   # ServiceRequest inner join with Service
+        if query_term.lower() in ['pending', 'requested', 'closed']:  # filter by service status | .lower converts into lowercase
+            service_query = service_query.filter(ServiceRequest.service_status.ilike(query_term))   #ilike is case insensitive while like is case sensitive
+        elif query_term:  # filter by service name
+            service_query = service_query.filter(Service.name.ilike(f'%{query_term}%'))
+        results = service_query.all()    #returns all services if no search query is given
+
+    # Handle customers search
+    elif search_type == 'customers':
+        customer_query = User.query.filter(User.role == 1)  # Only users
+        if query_term:  # If there is a search query like for the specific users
+            customer_query = customer_query.filter(    #queries can be filtered by user name, email, address
+                User.full_name.ilike(f'%{query_term}%') |    #  OR operation between them
+                User.email.ilike(f'%{query_term}%') |
+                User.address.ilike(f'%{query_term}%')
+            )
+        results = customer_query.all()  # Fetching all users if no search query is given
+
+    # Handle professionals search
+    elif search_type == 'professionals':
+        professional_query = Professional.query
+        if query_term:  # If a search query is given
+            professional_query = professional_query.filter(  #filter by professional name and email
+                (Professional.full_name.ilike(f'%{query_term}%'))  |    #  OR operation between them
+                User.email.ilike(f'%{query_term}%') 
+            )
+        results = professional_query.all()  # Fetch all professionals if no query is given
+
+    return render_template('admin_search.html', name=name, search_type=search_type, query=query_term, results=results)   #results are passed as parameters
+
+
+# for approving professionals by admin
+@app.route('/admin/approve_professional/<name>/<int:professional_id>', methods=['POST'])
+def approve_professional(name, professional_id):
+    prof = Professional.query.filter_by(id=professional_id).first()  # fetch
+    if not prof:  #if prof.id is not in database
+        return "Professional not found", 404  #error code 404
+    
+    prof.status = 'approved'  #if prof.id is in database
+    db.session.commit()
+    return redirect(url_for('admin_dashboard', name=name))
+
+
+#for rejecting professionals by admin
+@app.route('/admin/reject_professional/<name>/<int:professional_id>', methods=['POST'])
+def reject_professional(name, professional_id):
+    prof = Professional.query.filter_by(id=professional_id).first()  #fetch
+    
+    if not prof:  #if prof not in database
+        return "Professional not found", 404
+    #if prof present in database
+    db.session.delete(prof)
+    db.session.commit()
+
+    return redirect(url_for('admin_dashboard', name=name))
+
+  
+@app.route('/admin/requestedservices/<name>', methods=['GET'])
+def admin_servicerequests(name):
+    service_requests = ServiceRequest.query.join(Service, ServiceRequest.service_id == Service.id).join(User, ServiceRequest.user_id == User.id).join(Professional, ServiceRequest.professional_id == Professional.id)  #joining all 3 tables based on their IDs
+    results = []  # Initialisation
+    results = service_requests.all()
+
+    return redirect(url_for('admin_dashboard', name=name, results=results))   #results are passed to admin_dahboard as parameters
+
+
+    
 
 
 
+#------------------------------------------------------------FINAL-------------------------------------------------------------------------------------
 
 
 
@@ -205,28 +284,7 @@ def professional_summary():
     return render_template('professional_summary.html', user=Professional.query.first())
 
 
-#search routing-----
-@app.route('/admin/search', methods=["GET"])
-def admin_search():
-    if request.method == "GET" and request.args:
-        search_type = request.args.get('search_type')
-        service_status = request.args.get('service_status')
-        query = request.args.get('query')
 
-        results = []
-        if search_type == 'services':
-            results = Service.query.filter(Service.name.ilike(f'%{query}%')).all()
-        elif search_type == 'customers':
-            results = User.query.filter(User.role == 1, User.full_name.ilike(f'%{query}%')).all()
-        elif search_type == 'professionals':
-            results = User.query.filter(User.role == 2, User.full_name.ilike(f'%{query}%')).all()
-
-        if service_status != 'all':
-            results = [r for r in results if r.status == service_status]
-
-        return render_template('admin_search_results.html', results=results)
-    
-    return render_template('admin_search.html')
 
 @app.route('/professional/search', methods=["GET"])
 def professional_search():
@@ -267,10 +325,4 @@ def logout():
     return render_template("index.html")
 
 
-# # managing users routing for admin-------
-# @app.route('/admin/manage_users')
-# def admin_manage_users():
-#     users = User.query.all()
-#     admin = User.query.filter_by(role=0).first()  # Assuming role 0 is for admin
-#     return render_template('admin_manage_users.html', users=users, admin=admin)
 
