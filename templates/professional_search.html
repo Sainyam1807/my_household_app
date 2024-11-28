@@ -1,16 +1,53 @@
 {% extends "base_dashboard.html" %}
 
+{% block title %}Professional Search{% endblock %}
+
 {% block dashboard_content %}
-<h2>Professional Search</h2>
-<form action="{{ url_for('professional_search') }}" method="GET">
-    <div class="mb-3">
-        <label for="searchDate" class="form-label">Date</label>
-        <input type="date" class="form-control" id="searchDate" name="date">
+<h1 class="mb-4">Professional Search</h1>
+
+<!-- Search Form -->
+<form action="{{ url_for('professional_search', name=name) }}" method="GET" class="mb-4">
+    <div class="row">
+        <div class="col-md-8">
+            <label for="searchQuery" class="form-label">Search By User Name</label>
+            <input type="text" id="searchQuery" name="query" value="{{ query }}" class="form-control" placeholder="Enter user name">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
     </div>
-    <div class="mb-3">
-        <label for="searchLocation" class="form-label">Location</label>
-        <input type="text" class="form-control" id="searchLocation" name="location" placeholder="Enter location">
-    </div>
-    <button type="submit" class="btn btn-primary">Search</button>
 </form>
+
+<!-- Search Results -->
+<h3>Search Results</h3>
+{% if results %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>User Name</th>
+            <th>User Email</th>
+            <th>Address</th>
+            <th>Pincode</th>
+            <th>Date of Request</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in results %}
+        <tr>
+            <td>{{ result.service.name }}</td>
+            <td>{{ result.user.full_name }}</td>
+            <td>{{ result.user.email }}</td>
+            <td>{{ result.user.address }}</td>
+            <td>{{ result.user.pincode }}</td>
+            <td>{{ result.date_of_request }}</td>
+            <td>{{ result.service_status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No results found for the given user name.</p>
+{% endif %}
 {% endblock %}

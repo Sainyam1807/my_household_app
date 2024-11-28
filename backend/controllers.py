@@ -1,6 +1,8 @@
 from flask import Flask,render_template,request,redirect, url_for
 from .models import *
 from flask import current_app as app
+from datetime import datetime, timezone
+from sqlalchemy import func   #provides count, sum functions of sql
 
 
 @app.route('/')
@@ -89,29 +91,49 @@ def registerprofessional():
 # admin dashboard
 @app.route('/admindashboard/<name>')
 def admin_dashboard(name):
-    # name = request.args.get('name', 'Admin')  #Retrieves the 'name' query parameter from login |||  default case: Admin is rendered
-   
+
     services=get_services()  # for rendering for-loops of jinja templating
 
     user_count = User.query.filter_by(role=1).count()  # for calculating user count
 
     pending_prof = Professional.query.filter_by(status='pending').all()  #for seeing all pending professionals
+
+    service_requests = ServiceRequest.query.join(Service).join(User).outerjoin(Professional).all()
+
     
-    return render_template("admin_dashboard.html", user=User.query.filter_by(role=0).first(), name=name, services=services, user_count=user_count, pending_prof=pending_prof)
+    return render_template("admin_dashboard.html", user = User.query.filter_by(role=0).first(), name=name, services=services, user_count=user_count, pending_prof=pending_prof , results=service_requests)
 
 # user dashboard
 @app.route('/userdashboard/<name>')
 def user_dashboard(name):
-    # name = request.args.get('name', 'Professional') 
-    # return render_template("user_dashboard.html")
-    return render_template("user_dashboard.html", user=User.query.filter_by(role=1).first(), name=name)
+    message = request.args.get("message", "")
+    user = User.query.filter_by(full_name=name).first()
 
-#professional dashboard
+    services=get_services() # for rendering for-loops of jinja templating in user_dashboard
+ 
+    # for service history of users
+    servicehistory = (ServiceRequest.query.join(Service, ServiceRequest.service_id == Service.id).outerjoin(Professional, ServiceRequest.professional_id == Professional.id).filter(ServiceRequest.user_id == user.id).all())   #outer join with professionals because not every professional is assigned 
+
+    return render_template("user_dashboard.html", user=user, name=name, services=services, message=message, service_history=servicehistory)   # user is passsd as aparameter for jinja templating in base_dashboard
+
+
+
+# professional dashboard
 @app.route('/professionaldashboard/<name>')
 def professional_dashboard(name):
-    # name = request.args.get('name', 'User')
-    # return render_template("professional_dashboard.html")
-    return render_template("professional_dashboard.html", user=Professional.query.first(), name=name)
+    usr = Professional.query.filter_by(full_name=name).first()  #professional is fetched by name
+ 
+    if not usr:   # professional not found
+        return "Professional not found", 404 
+    
+    #for approval of services by professional || 1st section of professional dashboard
+    services = (ServiceRequest.query.join(User, ServiceRequest.user_id == User.id).join(Service, ServiceRequest.service_id == Service.id).filter(ServiceRequest.service_status == 'requested').filter(Service.name.ilike(f'%{usr.service_name}%')).all())  #inner joining ServiceRequest, User, Services with filtering requested services and service_name==professional_experience
+
+    service_history = (ServiceRequest.query.join(User, ServiceRequest.user_id == User.id).join(Service, ServiceRequest.service_id == Service.id).filter(ServiceRequest.professional_id == usr.id).filter(ServiceRequest.service_status.in_(['pending', 'closed'])).all())  #joining servicerequest and services and then filtering out professional_id==usr.id && status==pending or closed
+    
+    return render_template('professional_dashboard.html',name=name, user=usr, todays_services=services, service_history=service_history)
+
+
 
 # admin_create_services
 @app.route('/service/<name>', methods=["POST", "GET"])
@@ -188,7 +210,7 @@ def admin_search(name):
     search_type = request.args.get('search_type', 'services')  # 'services'by default |  these are the search parameters eg: ?search_type=services&query=
     query_term = request.args.get('query', '').strip()  #  empty string by default
 
-    results = []  # Initialising results
+    results = []  # Initialising 
 
     # Handle services search
     if search_type == 'services':
@@ -248,17 +270,138 @@ def reject_professional(name, professional_id):
 
     return redirect(url_for('admin_dashboard', name=name))
 
-  
-@app.route('/admin/requestedservices/<name>', methods=['GET'])
-def admin_servicerequests(name):
-    service_requests = ServiceRequest.query.join(Service, ServiceRequest.service_id == Service.id).join(User, ServiceRequest.user_id == User.id).join(Professional, ServiceRequest.professional_id == Professional.id)  #joining all 3 tables based on their IDs
-    results = []  # Initialisation
-    results = service_requests.all()
-
-    return redirect(url_for('admin_dashboard', name=name, results=results))   #results are passed to admin_dahboard as parameters
 
 
-    
+# booking services in user dashboard
+@app.route('/userdashboard/<name>/book_service/<int:service_id>', methods=['POST', 'GET'])
+def book_service(name, service_id):
+
+    user = User.query.filter_by(full_name=name).first() # user fetched by full name
+
+    if not user:   # if user is not present in db
+        return "User not found", 404
+
+    service = Service.query.get(service_id)   #fetching by service id
+    if not service:    # if service not found
+        return "Service not found", 404
+
+    service_request = ServiceRequest(     # filling partial info in ServiceRequest
+        user_id=user.id,
+        service_id=service_id,
+        service_status='requested',  # First it is requested
+        date_of_request = datetime.now(timezone.utc)
+    )
+    db.session.add(service_request)
+    db.session.commit()
+
+    return redirect(url_for('user_dashboard', name=name, message="Service successfully booked!"))   # message is passed
+
+# user search   
+@app.route('/user/search/<name>', methods=['GET'])
+def user_search(name):
+
+    query_term = request.args.get('query', '').strip()  # .strip removes trailing and leading whitespaces || default==empty string
+    search_type = request.args.get('search_type', 'services')  # Default== services || search by type
+
+    user = User.query.filter_by(full_name=name).first() # filtering by user name so that he can see only his own Service Requests
+    if not user:
+        return "User not found", 404
+
+    results = [] 
+
+    if search_type == 'services':  # if search type== services
+        results = (
+            ServiceRequest.query.join(Service, ServiceRequest.service_id == Service.id).filter(ServiceRequest.user_id == user.id).filter(Service.name.ilike(f'%{query_term}%')).all() ) #inner join of services and servicerequests
+
+    elif search_type == 'professionals':
+        results = (ServiceRequest.query.join(Professional, ServiceRequest.professional_id == Professional.id).filter(ServiceRequest.user_id == user.id).filter(Professional.full_name.ilike(f'%{query_term}%')).all())  #inner join of professionals and servicerequests
+
+    return render_template('user_search.html', name=name, query=query_term, search_type=search_type, results=results)  # results are passed as parameters
+
+
+
+# accepting service request by professional
+@app.route('/accept_service/<name>/<service_id>', methods=['POST'])
+def accept_service(name, service_id):
+
+    prof = Professional.query.filter_by(full_name=name).first()  #fetching current professional
+    service_request = ServiceRequest.query.get(service_id)      # fetching service_request by id
+
+    if not service_request or not prof:
+        return "Service Request or Professional not found", 404
+
+    service_request.professional_id = prof.id     #updating professional id in ServiceRequest to current professional id
+    service_request.service_status = 'pending'    # updating service_status to pending
+    db.session.commit()
+
+    return redirect(url_for('professional_dashboard', name=name))
+
+#rejecting servicerequest by professional
+@app.route('/reject_service/<name>/<int:service_id>', methods=['POST'])
+def reject_service(name, service_id):
+
+    service_request = ServiceRequest.query.get(service_id)  # fetching service reuest by id 
+
+    if not service_request:
+        return "Service Request not found", 404
+
+    db.session.commit()   #do nothing
+
+    return redirect(url_for('professional_dashboard', name=name))
+
+#close now service for user
+@app.route('/user/close_service/<name>/<service_id>', methods=["POST", "GET"])
+def close_service(name, service_id):
+    service_request = ServiceRequest.query.get(service_id)
+
+    if not service_request:
+        return "Service request not found", 404
+
+    service_request.service_status = 'closed'   #updation of service from pending to closed
+    service_request.date_of_completion = datetime.now(timezone.utc)  #date_of_completion
+    db.session.commit()
+
+    return redirect(url_for('service_rate_byuser', name=name, service_id=service_id))  #redirecting to service rate page
+
+
+# Service rate by user
+@app.route('/user/rate_service/<name>/<service_id>', methods=['GET', 'POST'])
+def rate_service(name,service_id):
+    service = ServiceRequest.query.filter_by(id=service_id).first()
+
+    if not service:
+        return "Service not found", 404
+
+    if request.method == 'POST':
+        rating = request.form.get('rating')
+        remarks = request.form.get('remarks', '') # can be set to null
+        service.rating = int(rating)
+        service.remarks = remarks
+        service.service_status = 'closed'  # updation
+        service.date_of_completion = datetime.now(timezone.utc)  # completion date set
+        db.session.commit()
+        return redirect(url_for('user_dashboard', name=name)) 
+
+    return render_template('service_rate_byuser.html', name=name, service=service, user=service.user)  #user is passed because in base_dashboard "user" is used as jinja templating in navbar
+
+
+#professional search
+@app.route('/professional/search/<name>', methods=['GET'])
+def professional_search(name):
+
+    prof = Professional.query.filter_by(full_name=name).first()
+
+    if not prof:
+        return "Professional not found", 404
+
+    query_term = request.args.get('query', '').strip()  #fetching query term given by user || default case==all users shown
+
+    results = (ServiceRequest.query.join(User, ServiceRequest.user_id == User.id).filter(ServiceRequest.professional_id == prof.id).filter(User.full_name.ilike(f'%{query_term}%')).all())
+
+    return render_template('professional_search.html', name=name, query=query_term, results=results)
+
+
+
 
 
 
@@ -285,37 +428,6 @@ def professional_summary():
 
 
 
-
-@app.route('/professional/search', methods=["GET"])
-def professional_search():
-    if request.method == "GET" and request.args:
-        date = request.args.get('date')
-        location = request.args.get('location')
-
-        # Assuming you have a ServiceRequest model
-        results = ServiceRequest.query.filter(
-            ServiceRequest.date == date,
-            ServiceRequest.location.ilike(f'%{location}%')
-        ).all()
-
-        return render_template('professional_search_results.html', results=results)
-    
-    return render_template('professional_search.html')
-
-@app.route('/user/search', methods=["GET"])
-def user_search():
-    if request.method == "GET" and request.args:
-        service = request.args.get('service')
-        professional = request.args.get('professional')
-
-        results = Service.query.filter(Service.name.ilike(f'%{service}%')).all()
-        if professional:
-            professional_results = User.query.filter(User.role == 2, User.full_name.ilike(f'%{professional}%')).all()
-            results = [r for r in results if r.professional in professional_results]
-
-        return render_template('user_search_results.html', results=results)
-    
-    return render_template('user_search.html')
 
 
 @app.route('/logout')

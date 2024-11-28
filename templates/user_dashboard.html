@@ -5,80 +5,106 @@
 {% block dashboard_content %}
 <h1 class="mb-4"> Welcome, {{name}} </h1>
 
+{% if message %}
+<div class="alert alert-success">
+    {{ message }}
+</div>
+{% endif %}
 
 <!-- availabe service-->
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="card-title">Available Services</h5>
             </div>
             <div class="card-body">
-                <div class="list-group">
-                    {% for service in available_services %}
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <h5 class="mb-1">{{ service.name }}</h5>
-                            <small>{{ service.base_price }}</small>
-                        </div>
-                        <p class="mb-1">{{ service.description }}</p>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <small>Duration: {{ service.duration }} hours</small>
-                            <a href="{{ url_for('user.book_service', service_id=service.id) }}"
-                                class="btn btn-primary btn-sm">Book Now</a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- service history-->
-
-    <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title">Service History</h5>
-            </div>
-            <div class="card-body">
+                {% if services %}
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Service</th>
-                            <th>Professional</th>
-                            <th>Date</th>
-                            <th>Phone</th>
-                            <th>Status</th>
+                            <th>Service Name</th>
+                            <th>Price (Rs.) </th>
+                            <th>Duration (hours)</th>
+                            <th>Description</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for service in service_history %}
+                        {% for service in services %}
                         <tr>
-                            <td>{{ service.service.name }}</td>
-                            <td>{{ service.professional.name }}</td>
-                            <td>{{ service.date }}</td>
-                            <td>{{ service.professional.phone }}</td>
-                            <td>{{ service.status }}</td>
+                            <td>{{ service.name }}</td>
+                            <td>{{ service.price }}</td>
+                            <td>{{ service.duration }}</td>
+                            <td>{{ service.description }}</td>
                             <td>
-                                {% if service.status == 'requested' %}
-                                <span class="text-warning">Pending</span>
-                                {% elif service.status == 'closed' %}
-                                <a href="{{ url_for('user.rate_service', service_id=service.id) }}"
-                                    class="btn btn-sm btn-primary">Rate</a>
-                                {% else %}
-                                <a href="{{ url_for('user.close_service', service_id=service.id) }}"
-                                    class="btn btn-sm btn-success">Close</a>
-                                {% endif %}
+                                <a href="{{ url_for('book_service', name=name, service_id=service.id) }}"
+                                    class="btn btn-primary btn-sm">Book Now</a>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                <p>No services are currently available.</p>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+
+<!-- service history-->
+<!-- Service History Section -->
+<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title">Service History</h5>
+        </div>
+        <div class="card-body">
+            {% if service_history %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Service Name</th>
+                        <th>Professional</th>
+                        <th>Date of Request</th>
+                        <th>Date of Completion</th>
+                        <th>Status</th>
+                        <th>Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in service_history %}
+                    <tr>
+                        <td>{{ service.service.name }}</td>
+                        <td>{{ service.professional.full_name if service.professional else "N/A" }}</td>
+                        <td>{{ service.date_of_request }}</td>
+                        <td>{{ service.date_of_completion if service.date_of_completion else "N/A" }}</td>
+                        <td>{{ service.service_status }}</td>
+                        <td>{{ service.rating if service.rating else "Not Rated" }}</td>
+                        <td>
+                            {% if service.service_status == 'requested' %}
+                            <span class="text-warning">Requested</span>
+                            {% elif service.service_status == 'closed' %}
+                            <span class="text-success">Closed</span>
+                            {% elif service.service_status == 'pending' %}
+                            <a href="{{ url_for('close_service', name=name, service_id=service.id) }}"
+                                class="btn btn-sm btn-success">Close Now</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No service history available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+
 {% endblock %}

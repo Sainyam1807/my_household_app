@@ -61,12 +61,12 @@ class ServiceRequest(db.Model):
     __tablename__ = 'service_requests'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)
+    professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=True)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
     date_of_request = db.Column(db.DateTime, nullable=False)
     date_of_completion = db.Column(db.DateTime)
     service_status = db.Column(db.String(20), nullable=False)  # 'requested', 'pending' , 'closed', 
-    rating = db.Column(db.Integer, nullable=False)  # out of 5
+    rating = db.Column(db.Integer)  # out of 5
     remarks = db.Column(db.Text)
 
 # # Admin model (for manual entry)

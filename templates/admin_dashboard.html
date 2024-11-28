@@ -111,12 +111,13 @@
 
 
 <!--requested services-->
+<!-- Service Requests Section -->
 <div class="card mt-4">
     <div class="card-header">
         <h5 class="card-title">Service Requests</h5>
     </div>
     <div class="card-body">
-        <a href="{{ url_for('admin_servicerequests', name=name) }}" class="btn btn-primary mb-3">View Requested Services</a>
+        {% if results %}
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -134,18 +135,22 @@
                 {% for result in results %}
                 <tr>
                     <td>{{ result.id }}</td>
-                    <td>{{ result.professional.full_name if result.professional.full_name else 'N/A' }}</td>
-                    <td>{{ request.user.full_name }}</td>
-                    <td>{{ request.service.name }}</td>
-                    <td>{{ request.date_of_request }}</td>
-                    <td>{{ request.date_of_completion if result.date_of_completion else 'N/A' }}</td>
-                    <td>{{ request.service_status }}</td>
-                    <td>{{ request.rating if result.rating else 'Not Rated'}}</td>
-
+                    <td>{{ result.professional.full_name if result.professional else 'N/A' }}</td>
+                    <td>{{ result.user.full_name }}</td>
+                    <td>{{ result.service.name }}</td>
+                    <td>{{ result.date_of_request }}</td>
+                    <td>{{ result.date_of_completion if result.date_of_completion else 'N/A' }}</td>
+                    <td>{{ result.service_status }}</td>
+                    <td>{{ result.rating if result.rating else 'Not Rated' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <p>No service requests are currently available.</p>
+        {% endif %}
     </div>
 </div>
+
+
 {% endblock %}

@@ -1,16 +1,75 @@
 {% extends "base_dashboard.html" %}
 
 {% block dashboard_content %}
+<h1 class="mb-4">Welcome, {{ name }}!</h1>
 <h2>User Search</h2>
-<form action="{{ url_for('user_search') }}" method="GET">
+
+<!-- Search Form -->
+<form action="{{ url_for('user_search', name=name) }}" method="GET">
+    <!-- Search By Type -->
     <div class="mb-3">
-        <label for="searchService" class="form-label">Service Name</label>
-        <input type="text" class="form-control" id="searchService" name="service" placeholder="Enter service name">
+        <label for="searchType" class="form-label">Search By</label>
+        <select id="searchType" name="search_type" class="form-select">
+            <option value="services" {% if search_type == 'services' %}selected{% endif %}>Service Name</option>
+            <option value="professionals" {% if search_type == 'professionals' %}selected{% endif %}>Professional Name</option>
+        </select>
     </div>
+
+    <!-- Search Query that is manually filled-->
     <div class="mb-3">
-        <label for="searchProfessional" class="form-label">Professional</label>
-        <input type="text" class="form-control" id="searchProfessional" name="professional" placeholder="Enter professional name">
+        <label for="searchQuery" class="form-label">Search Query</label>
+        <input type="text" class="form-control" id="searchQuery" name="query" placeholder="Enter search term" value="{{ query }}">
     </div>
+
     <button type="submit" class="btn btn-primary">Search</button>
 </form>
+
+<hr>
+
+<!-- Results -->
+<h3>Search Results</h3>
+{% if results %}
+    <table class="table table-striped mt-4">
+        <thead>
+            <tr>
+                {% if search_type == 'services' %}
+                <th>ID</th>
+                <th>Service Name</th>
+                <th>Status</th>
+                <th>Requested Date</th>
+                <th>Completion Date</th>
+                <th>Professional</th>
+                {% elif search_type == 'professionals' %}
+                <th>ID</th>
+                <th>Professional Name</th>
+                <th>Service Assigned</th>
+                <th>Request Status</th>
+                <th>Requested Date</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                {% if search_type == 'services' %}
+                <td>{{ result.id }}</td>
+                <td>{{ result.service.name }}</td>
+                <td>{{ result.service_status }}</td>
+                <td>{{ result.date_of_request }}</td>
+                <td>{{ result.date_of_completion if result.date_of_completion else 'N/A' }}</td>
+                <td>{{ result.professional.full_name if result.professional else 'N/A' }}</td>
+                {% elif search_type == 'professionals' %}
+                <td>{{ result.id }}</td>
+                <td>{{ result.professional.full_name }}</td>
+                <td>{{ result.service.name }}</td>
+                <td>{{ result.service_status }}</td>
+                <td>{{ result.date_of_request }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No results found for the given search criteria.</p>
+{% endif %}
 {% endblock %}
