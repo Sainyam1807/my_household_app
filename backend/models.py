@@ -38,7 +38,7 @@ class Professional(db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     service_name = db.Column(db.String(100), nullable=False)
     experience = db.Column(db.Integer, nullable=False)
-    # uploaded_documents = db.Column(db.String(255))  # Store file path or URL
+    uploaded_documents = db.Column(db.String(255))  # Stores file path or URL
     address = db.Column(db.String(255), nullable=False)
     pincode = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(10), nullable=False, default='pending') # for approval of admin

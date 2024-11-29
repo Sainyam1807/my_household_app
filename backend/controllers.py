@@ -3,6 +3,10 @@ from .models import *
 from flask import current_app as app
 from datetime import datetime, timezone
 from sqlalchemy import func   #provides count, sum functions of sql
+from werkzeug.utils import secure_filename  #checks files uploaded if they are secure or not
+import os
+
+
 
 
 @app.route('/')
@@ -49,7 +53,8 @@ def registeruser():
         fullname=request.form.get("full_name")
         address=request.form.get("address")
         pincode=request.form.get("pincode")
-        usr=User(email=uname)
+        
+        usr = User.query.filter_by(email=uname).first()
         if usr:
             return redirect(url_for('login', msg="this mail is already registered"))  #if user is already in database
         new_usr=User(email=uname,password=pwd,full_name=fullname,address=address,pincode=pincode) #creating user object
@@ -71,13 +76,21 @@ def registerprofessional():
         fullname=request.form.get("full_name")
         servicename=request.form.get("service_name")
         experience=request.form.get("experience")
+        file=request.files["documents"]
         address=request.form.get("address")
         pincode=request.form.get("pincode")
         usr = Professional.query.filter_by(email=uname).first()
         if usr:   
             return redirect(url_for('login', msg="Email already registered")) #if professional is already in database
         # if user is not already present
-        new_usr = Professional(email=uname, password=pwd, full_name=fullname, service_name=servicename, experience=experience, address=address, pincode=pincode, status='pending')  # status==pending for each registeration
+
+        url=""
+        if file.filename:   #if successfully filename is passed
+            file_name=secure_filename(file.filename)    #verification of file is done
+            url='./uploaded_files/'+fullname+"_"+file_name  #url is "./uploaded_files/file_name" || . is the root folder
+            file.save(url)
+        
+        new_usr = Professional(email=uname, password=pwd, full_name=fullname, service_name=servicename, experience=experience,uploaded_documents=url, address=address, pincode=pincode, status='pending')  # status==pending for each registeration
         db.session.add(new_usr)
         db.session.commit()
        
@@ -194,7 +207,7 @@ def edit_service(name,service_id):    #   example of query parameters: adminstra
     return render_template("admin_edit_service.html", service=service, name=name)
 
 # delete service in manage services for admin
-@app.route('/admin/delete_service/<name>/<int:service_id>', methods=["POST", "GET"])
+@app.route('/admin/delete_service/<name>/<service_id>', methods=["POST", "GET"])
 def delete_service(name,service_id):
     service = Service.query.get(service_id)
     if service:
@@ -246,7 +259,7 @@ def admin_search(name):
 
 
 # for approving professionals by admin
-@app.route('/admin/approve_professional/<name>/<int:professional_id>', methods=['POST'])
+@app.route('/admin/approve_professional/<name>/<professional_id>', methods=['POST'])
 def approve_professional(name, professional_id):
     prof = Professional.query.filter_by(id=professional_id).first()  # fetch
     if not prof:  #if prof.id is not in database
@@ -258,7 +271,7 @@ def approve_professional(name, professional_id):
 
 
 #for rejecting professionals by admin
-@app.route('/admin/reject_professional/<name>/<int:professional_id>', methods=['POST'])
+@app.route('/admin/reject_professional/<name>/<professional_id>', methods=['POST'])
 def reject_professional(name, professional_id):
     prof = Professional.query.filter_by(id=professional_id).first()  #fetch
     
@@ -273,7 +286,7 @@ def reject_professional(name, professional_id):
 
 
 # booking services in user dashboard
-@app.route('/userdashboard/<name>/book_service/<int:service_id>', methods=['POST', 'GET'])
+@app.route('/userdashboard/<name>/book_service/<service_id>', methods=['POST', 'GET'])
 def book_service(name, service_id):
 
     user = User.query.filter_by(full_name=name).first() # user fetched by full name
@@ -337,7 +350,7 @@ def accept_service(name, service_id):
     return redirect(url_for('professional_dashboard', name=name))
 
 #rejecting servicerequest by professional
-@app.route('/reject_service/<name>/<int:service_id>', methods=['POST'])
+@app.route('/reject_service/<name>/<service_id>', methods=['POST'])
 def reject_service(name, service_id):
 
     service_request = ServiceRequest.query.get(service_id)  # fetching service reuest by id 
@@ -405,6 +418,7 @@ def professional_search(name):
 
 
 
+
 #------------------------------------------------------------FINAL-------------------------------------------------------------------------------------
 
 
@@ -425,9 +439,6 @@ def user_summary():
 def professional_summary():
     # Add logic to fetch professional-specific summary details
     return render_template('professional_summary.html', user=Professional.query.first())
-
-
-
 
 
 @app.route('/logout')
