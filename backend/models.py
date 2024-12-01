@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-#from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()  #db instance creation
 
@@ -14,20 +13,6 @@ class User(db.Model):
     pincode = db.Column(db.Integer, nullable=False)
     service_requests = db.relationship('ServiceRequest',cascade="all,delete", backref='user', lazy='dynamic') #lazy is a server property
 
-    # def set_password(self, password):
-    #     self.password_hash = generate_password_hash(password)
-
-    # def check_password(self, password):
-    #     return check_password_hash(self.password_hash, password)
-
-# class Customer(User):
-#     __tablename__ = 'customers'
-#     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-#     service_requests = db.relationship('ServiceRequest', backref='customer', lazy='dynamic')
-
-#     __mapper_args__ = {
-#         'polymorphic_identity': 1,
-#     }
 
 class Professional(db.Model):
     __tablename__ = 'professional'
@@ -44,9 +29,6 @@ class Professional(db.Model):
     status = db.Column(db.String(10), nullable=False, default='pending') # for approval of admin
     service_requests = db.relationship('ServiceRequest',cascade="all,delete", backref='professional', lazy='dynamic') #relationship: professionals can access its service requests
 
-    # __mapper_args__ = {
-    #     'polymorphic_identity': 2,
-    # }
 
 class Service(db.Model):
     __tablename__ = 'service'
@@ -69,11 +51,3 @@ class ServiceRequest(db.Model):
     rating = db.Column(db.Integer)  # out of 5
     remarks = db.Column(db.Text)
 
-# # Admin model (for manual entry)
-# class Admin(User):
-#     __tablename__ = 'admins'
-#     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-
-#     __mapper_args__ = {
-#         'polymorphic_identity': 3,
-#     }

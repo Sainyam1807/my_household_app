@@ -4,10 +4,6 @@ from backend.models import db
 
 from backend.api_controllers import *
 
-# from sqlalchemy import event
-# from sqlalchemy.engine import Engine
-# import sqlite3
-
 #setting up of app
 app=None
 
@@ -24,8 +20,6 @@ def setup_app():
 
 #calling the setup app function
 setup_app()
-
-
 
 #accessing controllers.py in this
 from backend.controllers import *

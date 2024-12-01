@@ -443,21 +443,15 @@ def professional_search(name):
 #summary routing------
 @app.route('/admin/summary')
 def admin_summary():
-    # Add logic to fetch admin-specific summary details
     return render_template('admin_summary.html', user=User.query.filter_by(role=0).first())
 
 @app.route('/user/summary')
 def user_summary():
-    # Add logic to fetch user-specific summary details
     return render_template('user_summary.html', user=User.query.filter_by(role=1).first())
 
 @app.route('/professional/summary')
 def professional_summary():
-    # Add logic to fetch professional-specific summary details
     return render_template('professional_summary.html', user=Professional.query.first())
-
-
-
 
 
 
@@ -465,8 +459,6 @@ def professional_summary():
 
 @app.route('/logout')
 def logout():
-    # Clear session or handle logout logic (depending on how you manage sessions)
-    # You could just redirect to the home page after logging out
     return render_template("index.html")
 
 
