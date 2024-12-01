@@ -53,7 +53,7 @@ def registeruser():
         fullname=request.form.get("full_name")
         address=request.form.get("address")
         pincode=request.form.get("pincode")
-        
+
         usr = User.query.filter_by(email=uname).first()
         if usr:
             return redirect(url_for('login', msg="this mail is already registered"))  #if user is already in database
@@ -109,12 +109,14 @@ def admin_dashboard(name):
 
     user_count = User.query.filter_by(role=1).count()  # for calculating user count
 
+    prof_count = Professional.query.filter_by(status='approved').count()  # for calculating prof count
+
     pending_prof = Professional.query.filter_by(status='pending').all()  #for seeing all pending professionals
 
     service_requests = ServiceRequest.query.join(Service).join(User).outerjoin(Professional).all()
 
     
-    return render_template("admin_dashboard.html", user = User.query.filter_by(role=0).first(), name=name, services=services, user_count=user_count, pending_prof=pending_prof , results=service_requests)
+    return render_template("admin_dashboard.html", user = User.query.filter_by(role=0).first(), name=name, services=services, user_count=user_count, professional_count=prof_count, pending_prof=pending_prof , results=service_requests)
 
 # user dashboard
 @app.route('/userdashboard/<name>')
@@ -192,14 +194,37 @@ def admin_remove_user(user_id):
     
     return admin_manage_users()  # Re-render admin_manage_users 
 
+# manage professionals by admin
+@app.route('/admin/manage_professionals', methods=["GET"])
+def admin_manage_professionals():
+    professionals = Professional.query.filter_by(status='approved').all()  # Fetching all professionals
+    admin = User.query.filter_by(role=0).first()  # Fetching admin for <name> in admin dashboard
+    return render_template("admin_manage_professionals.html", professionals=professionals, admin=admin)
+
+# deleting professional by admin
+@app.route('/admin/remove_professional/<professional_id>', methods=['POST'])
+def admin_remove_professional(professional_id):
+    prof_remove = Professional.query.get(professional_id)
+    
+    if prof_remove:
+        db.session.delete(prof_remove)
+        db.session.commit()
+    
+    return redirect(url_for('admin_manage_professionals'))  # Re-render manage professionals page
+
+
 
 # edit service in admin services
 @app.route('/admin/edit_service/<name>/<service_id>', methods=["GET", "POST"])
 def edit_service(name,service_id):    #   example of query parameters: adminstrator/1
     service = Service.query.get(service_id)
+
+    if not service:  # Handle invalid service ID
+        return "Service not found", 404 
+    
     if request.method == "POST":
         service.name = request.form.get("service_name")
-        service.base_price = request.form.get("base_price")
+        service.price = request.form.get("base_price")
         service.duration = request.form.get("duration")
         service.description = request.form.get("description")
         db.session.commit()
@@ -247,7 +272,7 @@ def admin_search(name):
 
     # Handle professionals search
     elif search_type == 'professionals':
-        professional_query = Professional.query
+        professional_query = Professional.query.filter_by(status='approved')
         if query_term:  # If a search query is given
             professional_query = professional_query.filter(  #filter by professional name and email
                 (Professional.full_name.ilike(f'%{query_term}%'))  |    #  OR operation between them
@@ -374,7 +399,7 @@ def close_service(name, service_id):
     service_request.date_of_completion = datetime.now(timezone.utc)  #date_of_completion
     db.session.commit()
 
-    return redirect(url_for('service_rate_byuser', name=name, service_id=service_id))  #redirecting to service rate page
+    return redirect(url_for('rate_service', name=name, service_id=service_id))  #redirecting to service rate page
 
 
 # Service rate by user
@@ -415,15 +440,6 @@ def professional_search(name):
 
 
 
-
-
-
-
-#------------------------------------------------------------FINAL-------------------------------------------------------------------------------------
-
-
-
-
 #summary routing------
 @app.route('/admin/summary')
 def admin_summary():
@@ -440,6 +456,12 @@ def professional_summary():
     # Add logic to fetch professional-specific summary details
     return render_template('professional_summary.html', user=Professional.query.first())
 
+
+
+
+
+
+#------------------------------------------------------------FINAL-------------------------------------------------------------------------------------
 
 @app.route('/logout')
 def logout():

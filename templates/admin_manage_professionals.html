@@ -1,0 +1,37 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Manage Professionals{% endblock %}
+
+{% block dashboard_content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Manage Professionals</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Service</th>
+                <th>Experience</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for professional in professionals %}
+            <tr>
+                <td>{{ professional.id }}</td>
+                <td>{{ professional.full_name }}</td>
+                <td>{{ professional.email }}</td>
+                <td>{{ professional.service_name }}</td>
+                <td>{{ professional.experience }}</td>
+                <td>
+                    <form action="{{ url_for('admin_remove_professional', professional_id=professional.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
