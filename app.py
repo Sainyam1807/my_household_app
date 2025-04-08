@@ -24,5 +24,7 @@ setup_app()
 #accessing controllers.py in this
 from backend.controllers import *
 
-if __name__ == '__main__':
+                                                                                             
+if __name__ == "__main__":
     app.run()
+                                                                                         
